@@ -1,0 +1,47 @@
+# server.py
+import socket
+import os
+
+def start_server():
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_address = ('192.168.12.121', 12345)
+    server_socket.bind(server_address)
+    server_socket.listen(5)
+    print(f"Server is listening on {server_address}")
+    
+    while True:
+        print("Waiting for a connection...")
+        client_socket, client_address = server_socket.accept()
+        try:
+            print(f"Connection from {client_address}")
+            command = client_socket.recv(1024).decode()
+            if command.startswith("SEND"):
+                filename = command[5:]
+                print(f"Receiving file: {filename}")
+                with open(f"received_{filename}", 'wb') as f:
+                    while True: 
+                        data = client_socket.recv(4096)
+                        if not data:
+                            break
+                        f.write(data)
+                print(f"File received successfully")
+            elif command.startswith("REQUEST"):
+                filename = command[8:]
+                if not os.path.exists(filename):
+                    client_socket.sendall("File not found".encode())
+                    print(f"File {filename} not found")
+                else:
+                    file_size = os.path.getsize(filename)
+                    client_socket.sendall(str(file_size).encode())
+                    with open(filename, 'rb') as f:
+                        while True:
+                            data = f.read(4096)
+                            if not data:
+                                break
+                            client_socket.sendall(data)
+                    print(f"File {filename} sent successfully")
+        finally:
+            client_socket.close()
+
+if __name__ == '__main__':
+    start_server()
