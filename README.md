@@ -11,4 +11,4 @@ Student Info
 
 * Student Name: Nguyyễn Duy Nghĩa
 * Student ID: 22BI13331
-* Student Group ID: Not-for-now
+* Student Group ID: 5
